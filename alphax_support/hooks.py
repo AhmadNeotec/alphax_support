@@ -145,6 +145,20 @@ app_license = "mit"
 # 	}
 # }
 
+doc_events = {
+    "Support Ticket": {
+        "after_insert": "alphax_support.utils.send_ticket_email",
+        "autoname": "alphax_support.utils.set_ticket_id"
+    }
+}
+
+
+doc_events = {
+    "HD Ticket": {
+        "after_insert": "alphax_support.support.notification.send_ticket_notification"
+    }
+}
+
 # Scheduled Tasks
 # ---------------
 
@@ -237,6 +251,15 @@ app_license = "mit"
 
 # Automatically update python controller files with type annotations for this app.
 # export_python_type_annotations = True
+
+fixtures = [
+    {
+        "doctype": "Custom Field",
+        "filters": [
+            ["dt", "=", "HD Ticket"]
+        ]
+    }
+]
 
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
