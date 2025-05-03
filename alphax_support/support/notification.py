@@ -1,10 +1,11 @@
 # alphax_support/support/notification.py
 import frappe
+import requests
+from frappe import _
 
 @frappe.whitelist(allow_guest=True)
 def send_ticket_notification(doc, method=None):
-    """Send email notification to the configured support email when a new HD Ticket is created."""
-    # Fetch settings
+    """Send email notification and create a ticket on support.alphaxerp.com when a new HD Ticket is created."""
     settings = frappe.get_single("Alphax Support Settings")
     if not settings.enable_notifications:
         frappe.log("Notifications disabled in Alphax Support Settings")
@@ -16,9 +17,9 @@ def send_ticket_notification(doc, method=None):
     A new ticket has been raised:
     Ticket ID: {doc.name}
     Subject: {doc.subject}
-    Site Name: {doc.site_name or 'Not specified'}
-    Ticket Type: {doc.ticket_type or 'Unspecified'}
-    Plan: {doc.plan or 'Not specified'}
+    Site Name: {getattr(doc, 'custom_site_name', 'Not specified')}
+    Ticket Type: {getattr(doc, 'ticket_type', 'Unspecified')}
+    Plan: {getattr(doc, 'custom_plan', 'Not specified')}
     Description: {doc.description or 'No description provided'}
     Raised By: {doc.raised_by or 'Guest'}
     Priority: {doc.priority or 'Medium'}
@@ -28,7 +29,7 @@ def send_ticket_notification(doc, method=None):
     """
     recipients = [settings.support_email]
 
-    # Send email using Frappe's email API
+    # Send email
     try:
         frappe.sendmail(
             recipients=recipients,
@@ -39,3 +40,44 @@ def send_ticket_notification(doc, method=None):
         frappe.log(f"Notification sent for ticket {doc.name}")
     except Exception as e:
         frappe.log_error(f"Failed to send notification for ticket {doc.name}: {str(e)}")
+
+    # Hardcoded API credentials
+    API_KEY = "fadbab726a5c4f4"
+    API_SECRET = "23826bb0fa1096d"
+
+    # Create ticket on support.alphaxerp.com
+    try:
+        # Truncate fields to avoid length issues
+        truncated_subject = (doc.subject or "")[:140]
+        truncated_description = (doc.description or "No description provided")[:10000]  # Arbitrary safe limit
+        truncated_site_name = (getattr(doc, "custom_site_name", "") or "")[:140]
+        truncated_raised_by = (doc.raised_by or "Guest")[:140]
+
+        ticket_data = {
+            "doctype": "HD Ticket",
+            "subject": truncated_subject,
+            "description": truncated_description,
+            "status": doc.status or "Open",
+            "priority": doc.priority or "Medium",
+            "raised_by": truncated_raised_by,
+            "custom_site_name": truncated_site_name,
+            "ticket_type": getattr(doc, "ticket_type", ""),
+            "custom_plan": getattr(doc, "custom_plan", ""),
+            "custom_source_ticket_id": doc.name
+        }
+
+        api_url = "https://support.alphaxerp.com/api/resource/HD Ticket"
+        headers = {
+            "Authorization": f"token {API_KEY}:{API_SECRET}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(api_url, json=ticket_data, headers=headers)
+        response.raise_for_status()
+        response_data = response.json()
+        remote_ticket_id = response_data.get("data", {}).get("name")
+        frappe.log(f"Created ticket {remote_ticket_id} on support.alphaxerp.com for source ticket {doc.name}")
+    except Exception as e:
+        # Truncate the error message to avoid CharacterLengthExceededError in Error Log
+        error_message = f"Failed to create ticket on support.alphaxerp.com for {doc.name}: {str(e)}"[:120]
+        frappe.log_error(error_message)
