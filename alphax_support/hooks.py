@@ -256,14 +256,11 @@ doc_events = {
 # export_python_type_annotations = True
 
 fixtures = [
-    {
-        "doctype": "Custom Field",
-        "filters": [
-            ["dt", "=", "HD Ticket"]
-        ]
-    }
+    {"doctype": "Custom Field", "filters": [["dt", "in", ["HD Ticket", "HD Ticket Template"]]]},
+    {"dt": "Client Script", "filters": [["name", "in", ["HD Ticket Custom View", "HD Ticket Auto Set and Dependency", "HD Ticket List View Custom"]]]},
+    {"dt": "HD Ticket Template"},
+    {"dt": "HD Ticket Template Field"}
 ]
-
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }

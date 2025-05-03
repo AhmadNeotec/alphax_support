@@ -1,0 +1,13 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "HD Ticket",
+  "enabled": 1,
+  "modified": "2025-05-03 10:07:31.694161",
+  "module": "Alphax Support",
+  "name": "HD Ticket Auto Set and Dependency",
+  "script": "frappe.ui.form.on(\"HD Ticket\", {\r\n    onload(frm) {\r\n        // Run for new tickets or in Helpdesk UI\r\n        if (frm.is_new() || window.location.pathname.includes(\"/helpdesk/tickets\")) {\r\n            // Fetch the site name from the server\r\n            frappe.call({\r\n                method: \"alphax_support.support.utils.get_current_site\",\r\n                callback: function(r) {\r\n                    if (r.message) {\r\n                        console.log(\"Fetched Site Name:\", r.message);\r\n                        frm.set_value(\"custom_site_name\", r.message);\r\n                    } else {\r\n                        console.log(\"Could not fetch site name, using fallback.\");\r\n                        frm.set_value(\"custom_site_name\", \"Not specified\");\r\n                    }\r\n                },\r\n                error: function(err) {\r\n                    console.error(\"Error fetching site name:\", err);\r\n                    frm.set_value(\"custom_site_name\", \"Not specified\");\r\n                }\r\n            });\r\n\r\n            // Ensure ticket_type has a default value to trigger dependency logic\r\n            if (!frm.doc.ticket_type) {\r\n                frm.set_value(\"ticket_type\", \"Unspecified\");\r\n            }\r\n        }\r\n    },\r\n    refresh(frm) {\r\n        // Also run on refresh for standard forms\r\n        if (frm.is_new()) {\r\n            frappe.call({\r\n                method: \"alphax_support.support.utils.get_current_site\",\r\n                callback: function(r) {\r\n                    if (r.message && !frm.doc.custom_site_name) { // Only set if not already set\r\n                        console.log(\"Fetched Site Name (refresh):\", r.message);\r\n                        frm.set_value(\"custom_site_name\", r.message);\r\n                    }\r\n                }\r\n            });\r\n        }\r\n    },\r\n});",
+  "view": "Form"
+ }
+]
