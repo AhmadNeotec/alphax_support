@@ -16,7 +16,7 @@
    "label": "Settings"
   },
   {
-   "default": "alphaxerp@support.com",
+   "default": "erpsupport@irsaa.com",
    "fieldname": "support_email",
    "fieldtype": "Data",
    "label": "Support Email"
@@ -32,7 +32,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-05-02 10:32:46.700825",
+ "modified": "2025-05-03 20:43:12.298940",
  "modified_by": "Administrator",
  "module": "Alphax Support",
  "name": "Alphax Support Settings",
