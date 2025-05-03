@@ -1,33 +1,37 @@
 [
- {
-  "about": null,
-  "description_template": null,
-  "docstatus": 0,
-  "doctype": "HD Ticket Template",
-  "fields": [
-   {
-    "fieldname": "custom_site_name",
-    "hide_from_customer": 0,
-    "parent": "Default",
-    "parentfield": "fields",
-    "parenttype": "HD Ticket Template",
-    "placeholder": null,
-    "required": 0,
-    "url_method": null
-   },
-   {
-    "fieldname": "custom_plan",
-    "hide_from_customer": 0,
-    "parent": "Default",
-    "parentfield": "fields",
-    "parenttype": "HD Ticket Template",
-    "placeholder": null,
-    "required": 0,
-    "url_method": null
-   }
-  ],
-  "modified": "2025-05-03 08:47:01.935062",
-  "name": "Default",
-  "template_name": "Default"
- }
+    {
+        "about": null,
+        "description_template": null,
+        "docstatus": 0,
+        "doctype": "HD Ticket Template",
+        "fields": [
+            {
+                "fieldname": "custom_site_name",
+                "hide_from_customer": 0,
+                "parent": "Default",
+                "parentfield": "fields",
+                "parenttype": "HD Ticket Template",
+                "placeholder": null,
+                "required": 0,
+                "url_method": null,
+                "doctype": "HD Ticket Template Field",
+                "name": "custom_site_name_field"
+            },
+            {
+                "fieldname": "custom_plan",
+                "hide_from_customer": 0,
+                "parent": "Default",
+                "parentfield": "fields",
+                "parenttype": "HD Ticket Template",
+                "placeholder": null,
+                "required": 0,
+                "url_method": null,
+                "doctype": "HD Ticket Template Field",
+                "name": "custom_plan_field"
+            }
+        ],
+        "modified": "2025-05-03 08:47:01.935062",
+        "name": "Default",
+        "template_name": "Default"
+    }
 ]

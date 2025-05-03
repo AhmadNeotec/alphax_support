@@ -252,6 +252,10 @@ doc_events = {
 # 	"alphax_support.auth.validate"
 # ]
 
+
+after_migrate = [
+    "alphax_support.migrations.add_hd_ticket_custom_fields.execute"
+]
 # Automatically update python controller files with type annotations for this app.
 # export_python_type_annotations = True
 
