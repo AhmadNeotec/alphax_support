@@ -1,7 +1,7 @@
-# alphax_support/support/notification.py
 import frappe
 import requests
 from frappe import _
+import re
 
 @frappe.whitelist(allow_guest=True)
 def send_ticket_notification(doc, method=None):
@@ -10,6 +10,12 @@ def send_ticket_notification(doc, method=None):
     if not settings.enable_notifications:
         frappe.log("Notifications disabled in Alphax Support Settings")
         return
+
+    # Determine the sender email dynamically
+    raised_by = doc.raised_by or "Guest"
+    # Regular expression to validate email format
+    email_pattern = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
+    sender = raised_by if email_pattern.match(raised_by) else settings.support_email
 
     # Prepare email content
     subject = f"New Ticket Raised: {doc.subject}"
@@ -21,7 +27,7 @@ def send_ticket_notification(doc, method=None):
     Ticket Type: {getattr(doc, 'ticket_type', 'Unspecified')}
     Plan: {getattr(doc, 'custom_plan', 'Not specified')}
     Description: {doc.description or 'No description provided'}
-    Raised By: {doc.raised_by or 'Guest'}
+    Raised By: {raised_by}
     Priority: {doc.priority or 'Medium'}
     Status: {doc.status or 'Open'}
 
@@ -35,15 +41,15 @@ def send_ticket_notification(doc, method=None):
             recipients=recipients,
             subject=subject,
             message=message,
-            sender="support@neotechiss.com"
+            sender=sender
         )
-        frappe.log(f"Notification sent for ticket {doc.name}")
+        frappe.log(f"Notification sent for ticket {doc.name} from {sender}")
     except Exception as e:
-        frappe.log_error(f"Failed to send notification for ticket {doc.name}: {str(e)}")
+        frappe.log_error(f"Failed to send notification for ticket {doc.name} from {sender}: {str(e)}")
 
-    # Hardcoded API credentials
-    API_KEY = "fadbab726a5c4f4"
-    API_SECRET = "23826bb0fa1096d"
+    # Fetch API credentials from settings
+    api_key = "fadbab726a5c4f4"
+    api_secret = "23826bb0fa1096d"
 
     # Create ticket on support.alphaxerp.com
     try:
@@ -51,7 +57,7 @@ def send_ticket_notification(doc, method=None):
         truncated_subject = (doc.subject or "")[:140]
         truncated_description = (doc.description or "No description provided")[:10000]  # Arbitrary safe limit
         truncated_site_name = (getattr(doc, "custom_site_name", "") or "")[:140]
-        truncated_raised_by = (doc.raised_by or "Guest")[:140]
+        truncated_raised_by = (raised_by)[:140]
 
         ticket_data = {
             "doctype": "HD Ticket",
@@ -68,7 +74,7 @@ def send_ticket_notification(doc, method=None):
 
         api_url = "https://support.alphaxerp.com/api/resource/HD Ticket"
         headers = {
-            "Authorization": f"token {API_KEY}:{API_SECRET}",
+            "Authorization": f"token {api_key}:{api_secret}",
             "Content-Type": "application/json"
         }
 
