@@ -162,6 +162,11 @@ doc_events = {
     }
 }
 
+doc_events = {
+    "HD Ticket": {
+        "after_save": "alphax_support.utils.sync_ticket_status"
+    }
+}
 # Scheduled Tasks
 # ---------------
 

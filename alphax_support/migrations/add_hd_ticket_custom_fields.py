@@ -33,4 +33,18 @@ def execute():
             "translatable": 1
         }).insert()
 
-    print("Custom fields custom_site_name and custom_plan added to HD Ticket.")
+    # Add custom_remote_ticket_id field
+    if not frappe.db.exists("Custom Field", {"dt": "HD Ticket", "fieldname": "custom_remote_ticket_id"}):
+        frappe.get_doc({
+            "doctype": "Custom Field",
+            "dt": "HD Ticket",
+            "fieldname": "custom_remote_ticket_id",
+            "fieldtype": "Data",
+            "label": "Remote Ticket ID",
+            "insert_after": "custom_plan",
+            "module": "Alphax Support",
+            "read_only": 1,
+            "translatable": 0
+        }).insert()
+
+    print("Custom fields custom_site_name, custom_plan, and custom_remote_ticket_id added to HD Ticket.")

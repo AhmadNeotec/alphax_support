@@ -2,6 +2,7 @@ import frappe
 import requests
 from frappe import _
 import re
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 @frappe.whitelist(allow_guest=True)
 def send_ticket_notification(doc, method=None):
@@ -13,7 +14,6 @@ def send_ticket_notification(doc, method=None):
 
     # Determine the sender email dynamically
     raised_by = doc.raised_by or "Guest"
-    # Regular expression to validate email format
     email_pattern = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
     sender = raised_by if email_pattern.match(raised_by) else settings.support_email
 
@@ -23,7 +23,7 @@ def send_ticket_notification(doc, method=None):
     A new ticket has been raised:
     Ticket ID: {doc.name}
     Subject: {doc.subject}
-    Site Name: {getattr(doc, 'custom_site_name', 'Not specified')}
+    Site Name: {frappe.local.site}
     Ticket Type: {getattr(doc, 'ticket_type', 'Unspecified')}
     Plan: {getattr(doc, 'custom_plan', 'Not specified')}
     Description: {doc.description or 'No description provided'}
@@ -48,15 +48,20 @@ def send_ticket_notification(doc, method=None):
         frappe.log_error(f"Failed to send notification for ticket {doc.name} from {sender}: {str(e)}")
 
     # Fetch API credentials from settings
-    api_key = "fadbab726a5c4f4"
-    api_secret = "23826bb0fa1096d"
+    api_key = "ca80ab27649fc73"
+    api_secret = "1142651de7e248d"
 
     # Create ticket on support.alphaxerp.com
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
+    def create_remote_ticket(api_url, ticket_data, headers):
+        response = requests.post(api_url, json=ticket_data, headers=headers)
+        response.raise_for_status()
+        return response
+
     try:
-        # Truncate fields to avoid length issues
         truncated_subject = (doc.subject or "")[:140]
-        truncated_description = (doc.description or "No description provided")[:10000]  # Arbitrary safe limit
-        truncated_site_name = (getattr(doc, "custom_site_name", "") or "")[:140]
+        truncated_description = (doc.description or "No description provided")[:10000]
+        truncated_site_name = frappe.local.site[:140]  # Use domain
         truncated_raised_by = (raised_by)[:140]
 
         ticket_data = {
@@ -78,12 +83,13 @@ def send_ticket_notification(doc, method=None):
             "Content-Type": "application/json"
         }
 
-        response = requests.post(api_url, json=ticket_data, headers=headers)
-        response.raise_for_status()
+        response = create_remote_ticket(api_url, ticket_data, headers)
         response_data = response.json()
         remote_ticket_id = response_data.get("data", {}).get("name")
-        frappe.log(f"Created ticket {remote_ticket_id} on support.alphaxerp.com for source ticket {doc.name}")
+        if remote_ticket_id:
+            frappe.db.set_value("HD Ticket", doc.name, "custom_remote_ticket_id", remote_ticket_id)
+            frappe.db.commit()
+            frappe.log(f"Created ticket {remote_ticket_id} on support.alphaxerp.com for source ticket {doc.name}")
     except Exception as e:
-        # Truncate the error message to avoid CharacterLengthExceededError in Error Log
         error_message = f"Failed to create ticket on support.alphaxerp.com for {doc.name}: {str(e)}"[:120]
         frappe.log_error(error_message)
