@@ -49,7 +49,7 @@ def send_ticket_notification(doc, method=None):
 
     # Fetch API credentials from settings
     api_key = "fadbab726a5c4f4"
-    api_secret = "23826bb0fa1096d"
+    api_secret = "6d1c3c0ae161d15"
 
     # Create ticket on support.alphaxerp.com
     try:
