@@ -1,0 +1,38 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"G-t1hDYozG\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">AlphaX Support</span>\",\"col\":12}},{\"id\":\"Ln2kZe9BMQ\",\"type\":\"paragraph\",\"data\":{\"text\":\"Raise Your Issues Here\",\"col\":12}},{\"id\":\"iN8Ft344sP\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Alphax Support\",\"col\":3}}]",
+ "creation": "2025-05-26 11:38:55.549387",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "support",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "AlphaX Support",
+ "links": [],
+ "modified": "2025-05-26 11:44:48.761845",
+ "modified_by": "Administrator",
+ "module": "Alphax Support",
+ "name": "AlphaX Support",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 28.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Alphax Support",
+   "link_to": "HD Ticket",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "AlphaX Support"
+}
